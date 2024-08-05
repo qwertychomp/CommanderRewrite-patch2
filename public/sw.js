@@ -11,9 +11,6 @@ importScripts("/scramjet/scramjet.worker.js");
 const uv = new UVServiceWorker();
 const scramjet = new ScramjetServiceWorker();
 
-self.addEventListener("install", () => {
-    self.skipWaiting();
-});
 
 self.addEventListener("fetch", event => {
     event.respondWith(

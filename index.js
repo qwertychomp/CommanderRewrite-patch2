@@ -90,7 +90,7 @@ server.on("request", (req, res) => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-    if (req.url?.startsWith("/wisp/")) {
+    if (req.url?.endsWith("/wisp/")) {
         wisp.routeRequest(req, socket, head);
     } else if (shouldRouteRammerhead(req)) {
         routeRammerheadUpgrade(req, socket, head);
