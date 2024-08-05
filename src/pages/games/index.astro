@@ -1,0 +1,84 @@
+---
+import "tailwindcss/tailwind.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
+import storage from "../../lib/localStorage.ts";
+import gameFetch from "../../lib/gameFetch.ts";
+
+const proxy = storage.get('proxy');
+var jsonFile = await fetch("https://cdn.jsdelivr.net/gh/Radon-Games/Radon-Games@main/src/games.json");
+var games = await jsonFile.json();
+---
+
+<style type="text/css">
+    body {
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    #searchContainer {
+        width: 81%;
+        height: 35px;
+        position: absolute;
+        left: 11%;
+        background-color: #AFA8A8;
+        border-radius: 30vh;
+        z-index: 99;
+        top: 3%;
+    }
+    #games div {
+        transition: 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+    }
+
+    #games div:hover {
+        transform: scale(+1.021) translateY(-2%);
+        filter: brightness(86%);
+    }
+    .game {
+        width: 200px;
+        height: 150px;
+        border-radius: 25px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-color: #4f575e;
+    }
+    #searchIcon {
+        font-size: 10vh;
+        z-index: 99;
+    }
+    #search {
+        position: absolute;
+        left: 2%;
+        height: 100%;
+        width: 96%;
+        background-color: #AFA8A8
+    }
+    #games {
+        position: absolute;
+    }
+</style>
+<head>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body 
+    class="bg-[#2f2f2f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]"
+>
+    <ion-icon name="search-sharp" id="searchIcon"></ion-icon>
+    <div id="searchContainer">
+        <input type="text" id="search"></input>
+    </div>
+
+<body 
+    class="bg-[#080d0f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]"
+>
+    <div
+        class="w-full h-[65%] flex flex-row justify-center items-center gap-[20px] flex-wrap overflow-y-visible"
+        id="games"
+    >
+      {
+          games.map((data) => <div id={data.id} title={data.title} class="game" style={"background-image: url(https://metallic.eu.org/cdn/images/"+data.id+".png);"}></div>)
+      }
+    </div>
+</body>
