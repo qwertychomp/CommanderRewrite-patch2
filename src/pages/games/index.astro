@@ -6,11 +6,23 @@ import "@fontsource/roboto/700.css";
 
 import storage from "../../lib/localStorage.ts";
 import gameFetch from "../../lib/gameFetch.ts";
-import extraGames from "./extra-games.json";
+import extraGames from "../../lib/config/extra-games.json";
 
 const proxy = storage.get('proxy');
 var jsonFile = await fetch("https://cdn.jsdelivr.net/gh/Radon-Games/Radon-Games@main/src/games.json");
 var games = await jsonFile.json();
+var x = ""
+var y = 0
+var createElement = false
+function compare(z: number,c: number){
+    return z>c
+}
+function equals(z: number,c: number){
+    return z==c
+}
+function updateX(desc: string){
+    x = x + desc
+}
 ---
 
 <style type="text/css">
@@ -58,6 +70,7 @@ var games = await jsonFile.json();
         transition-property: color;
         transition-duration: 1s;
         z-index: 99;
+        white-space:nowrap;
     }
     .textContainerContainer {
         width: 200px;
@@ -208,7 +221,8 @@ function rgbHex(red, green, blue, alpha) {
         id="games"
     >
     {
-        extraGames.map((data) => <div id={data.id} title={data.title} class="game" style={"background-image: url(../games/extraGame-icons/"+data.id+".png);"}>
+        extraGames.map((data) => 
+        <div id={data.id} title={data.title} class="game" style={"background-image: url(../games/extraGame-icons/"+data.id+".png);"}>
           <div class="textContainerContainer">
               <div class="textContainer">
                   <p class="gameDesc">{data.description}</p>
@@ -217,10 +231,18 @@ function rgbHex(red, green, blue, alpha) {
         </div>)
     }
       {
-          games.map((data) => <div id={data.id} title={data.title} class="game" style={"background-image: url(https://metallic.eu.org/cdn/images/"+data.id+".png);"}>
+          games.map((data) => 
+          <div id={data.id} title={data.title} class="game" style={"background-image: url(https://metallic.eu.org/cdn/images/"+data.id+".png);"}>
             <div class="textContainerContainer">
                 <div class="textContainer">
-                    <p class="gameDesc">{data.description}</p>
+                    {
+                    Array.from(data.description).map((desc: string) => {
+                        updateX(desc)
+                        compare(x.length,19) && equals(y,4) && <p class="gameDesc">{x}</p> 
+                        compare(x.length,19) && y++
+                    }
+                    )
+                    }
                 </div>
             </div>
           </div>)
