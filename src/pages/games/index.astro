@@ -1,160 +1,69 @@
----
-import "tailwindcss/tailwind.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
-
-import storage from "../../lib/localStorage.ts";
-import gameFetch from "../../lib/gameFetch.ts";
-import extraGames from "../../lib/config/extra-games.json";
-
-const proxy = storage.get('proxy');
-var jsonFile = await fetch("https://cdn.jsdelivr.net/gh/Radon-Games/Radon-Games@main/src/games.json");
-var games = await jsonFile.json();
-var x = ""
-var y = 0
-var createElement = false
-function compare(z: number,c: number){
-    return z>c
-}
-function equals(z: number,c: number){
-    return z==c
-}
-function updateX(desc: string){
-    x = x + desc
-}
----
-
-<style type="text/css">
-    body {
-        box-sizing: border-box;
-        overflow-x: hidden;
-    }
-    #searchContainer {
-        width: 81%;
-        height: 35px;
-        position: absolute;
-        left: 11%;
-        background-color: #AFA8A8;
-        border-radius: 30vh;
-        z-index: 99;
-        top: 3%;
-    }
-    #games div {
-        transition: 0.4s cubic-bezier(0.86, 0, 0.07, 1);
-    }
-
-    #games div:hover {
-        transform: scale(+1.021) translateY(-2%);
-        filter: brightness(86%);
-    }
-    .game {
-        width: 200px;
-        height: 150px;
-        border-radius: 25px;
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        background-color: #4f575e;
-    }
-    .gameDesc {
-        width: 150px;
-        height: 100px;
-        text-align: center;
-        position: absolute;
-        border-radius: 25px;
-        font-size: 14px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        background-color: rgba(0, 0, 0, 0);
-        color: rgba(195, 189, 192, 0);
-        transition-property: color;
-        transition-duration: 1s;
-        z-index: 99;
-        white-space:nowrap;
-    }
-    .textContainerContainer {
-        width: 200px;
-        height: 150px;
-        background-color: rgba(0, 0, 0, 0);
-        transition-property: background-color;
-        transition-duration: 1s;
-        border-radius: 25px;
-    }
-    .textContainerContainer:hover {
-        background-color: rgba(0, 0, 0, 0.5);
-    }
-    .textContainer {
-        margin: auto;
-        width: 150px;
-        height: 100px;
-    }
-    .gameDesc:hover {
-        color: rgba(195, 189, 192, 1);
-    }
-    .game
-    #searchIcon {
-        font-size: 10vh;
-        z-index: 99;
-    }
-    #search {
-        position: absolute;
-        left: 2%;
-        height: 100%;
-        width: 96%;
-        background-color: #AFA8A8
-    }
-    #games {
-        position: absolute;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script> -->
-    <!--  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/rgb-hex@4.1.0/index.js"></script> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/rgb-hex@4.1.0/index.js"></script>
     <script>
+        const toHex = (red, green, blue, alpha) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
 
-const toHex = (red, green, blue, alpha) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
+        function rgbHex(red, green, blue, alpha) {
+	        let isPercent = (red + (alpha || '')).toString().includes('%');
 
-function rgbHex(red, green, blue, alpha) {
-	let isPercent = (red + (alpha || '')).toString().includes('%');
+	        if (typeof red === 'string' && !green) { // Single string parameter.
+		        const parsed = parseCssRgbString(red);
+		        if (!parsed) {
+			        throw new TypeError('Invalid or unsupported color format.');
+		        }
 
-	if (typeof red === 'string' && !green) { // Single string parameter.
-		const parsed = parseCssRgbString(red);
-		if (!parsed) {
-			throw new TypeError('Invalid or unsupported color format.');
-		}
+		        isPercent = false;
+		        [red, green, blue, alpha] = parsed;
+	        } else if (alpha !== undefined) {
+		        alpha = Number.parseFloat(alpha);
+	        }
 
-		isPercent = false;
-		[red, green, blue, alpha] = parsed;
-	} else if (alpha !== undefined) {
-		alpha = Number.parseFloat(alpha);
-	}
+	        if (typeof red !== 'number' ||
+		        typeof green !== 'number' ||
+		        typeof blue !== 'number' ||
+		        red > 255 ||
+		        green > 255 ||
+		        blue > 255
+	        ) {
+		        throw new TypeError('Expected three numbers below 256');
+	        }
 
-	if (typeof red !== 'number' ||
-		typeof green !== 'number' ||
-		typeof blue !== 'number' ||
-		red > 255 ||
-		green > 255 ||
-		blue > 255
-	) {
-		throw new TypeError('Expected three numbers below 256');
-	}
+	        if (typeof alpha === 'number') {
+		        if (!isPercent && alpha >= 0 && alpha <= 1) {
+			        alpha = Math.round(255 * alpha);
+		        } else if (isPercent && alpha >= 0 && alpha <= 100) {
+			        alpha = Math.round(255 * alpha / 100);
+		        } else {
+			        throw new TypeError(Expected alpha value (${alpha}) as a fraction or percentage);
+		        }
 
-	if (typeof alpha === 'number') {
-		if (!isPercent && alpha >= 0 && alpha <= 1) {
-			alpha = Math.round(255 * alpha);
-		} else if (isPercent && alpha >= 0 && alpha <= 100) {
-			alpha = Math.round(255 * alpha / 100);
-		} else {
-			throw new TypeError(`Expected alpha value (${alpha}) as a fraction or percentage`);
-		}
+		        alpha = (alpha | 1 << 8).toString(16).slice(1); // eslint-disable-line no-mixed-operators
+	        } else {
+		        alpha = '';
+	        }
 
-		alpha = (alpha | 1 << 8).toString(16).slice(1); // eslint-disable-line no-mixed-operators
-	} else {
-		alpha = '';
-	}
-
-	return toHex(red, green, blue, alpha);
+	        return toHex(red, green, blue, alpha);
+            var games = document.querySelectorAll(".textContainerContainer");
+            for(let x = 0;x<games.length;x++){
+                games[x].addEventListener("mouseover", (event) => {
+                    console.log("mouse hovering over " + event.currentTarget);
+                    console.log("its grandchild is " + event.currentTarget.children[0].children[0])
+                    //event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 50" + "%)");
+                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(195, 189, 192, 100" + "%)");
+                });
+                games[x].addEventListener("mouseout", (event) => {
+                    console.log("mouse left" + event.currentTarget)
+                    event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
+                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
+                });
+            }
 }
 
     const parseCssRgbString = input => {
@@ -189,63 +98,114 @@ function rgbHex(red, green, blue, alpha) {
                 console.log(rgbHex(input))
                 return "#" + rgbHex(input);
             }
-            var games = document.querySelectorAll(".textContainerContainer");
-            for(let x = 0;x<games.length;x++){
-                games[x].addEventListener("mouseover", (event) => {
-                    console.log("mouse hovering over " + event.currentTarget);
-                    console.log("its grandchild is " + event.currentTarget.children[0].children[0])
-                    //event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 50" + "%)");
-                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(195, 189, 192, 100" + "%)");
-                });
-                games[x].addEventListener("mouseout", (event) => {
-                    console.log("mouse left" + event.currentTarget)
-                    event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
-                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
-                });
-            }
     </script>
+    <style>
+        body {
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        #searchContainer {
+            width: 81%;
+            height: 35px;
+            position: absolute;
+            left: 11%;
+            background-color: #AFA8A8;
+            border-radius: 30vh;
+            z-index: 99;
+            top: 3%;
+        }
+        #games div {
+            transition: 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+        #games div:hover {
+            transform: scale(1.021) translateY(-2%);
+            filter: brightness(86%);
+        }
+        .game {
+            width: 200px;
+            height: 150px;
+            border-radius: 25px;
+            background-size: cover;
+            background-color: #4f575e;
+        }
+        .gameDesc {
+            width: 150px;
+            height: 100px;
+            text-align: center;
+            position: absolute;
+            border-radius: 25px;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background-color: rgba(0, 0, 0, 0);
+            color: rgba(195, 189, 192, 0);
+            transition: color 1s;
+            z-index: 99;
+            white-space: nowrap;
+        }
+        .textContainerContainer {
+            width: 200px;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0);
+            transition: background-color 1s;
+            border-radius: 25px;
+        }
+        .textContainerContainer:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .textContainer {
+            margin: auto;
+            width: 150px;
+            height: 100px;
+        }
+        #searchIcon {
+            font-size: 10vh;
+            z-index: 99;
+        }
+        #search {
+            position: absolute;
+            left: 2%;
+            height: 100%;
+            width: 96%;
+            background-color: #AFA8A8;
+        }
+        #games {
+            position: absolute;
+        }
+    </style>
 </head>
-<body 
-    class="bg-[#2f2f2f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]"
->
+<body class="bg-[#080d0f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]">
     <ion-icon name="search-sharp" id="searchIcon"></ion-icon>
     <div id="searchContainer">
-        <input type="text" id="search"></input>
+        <input type="text" id="search">
     </div>
 
-<body 
-    class="bg-[#080d0f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]"
->
-    <div
-        class="w-full h-[65%] flex flex-row justify-center items-center gap-[20px] flex-wrap overflow-y-visible"
-        id="games"
-    >
-    {
-        extraGames.map((data) => 
-        <div id={data.id} title={data.title} class="game" style={"background-image: url(../games/extraGame-icons/"+data.id+".png);"}>
-          <div class="textContainerContainer">
-              <div class="textContainer">
-                  <p class="gameDesc">{data.description}</p>
-              </div>
-          </div>
-        </div>)
-    }
-      {
-          games.map((data) => 
-          <div id={data.id} title={data.title} class="game" style={"background-image: url(https://metallic.eu.org/cdn/images/"+data.id+".png);"}>
-            <div class="textContainerContainer">
-                <div class="textContainer">
-                    {
-                    Array.from(data.description).map((desc: string) => {
-                        updateX(desc)
-                        compare(x.length,19) && equals(y,4) && <p class="gameDesc">{x}</p> 
-                        compare(x.length,19) && y++
-                    }
-                    )
-                    }
+    <div id="games" class="w-full h-[65%] flex flex-row justify-center items-center gap-[20px] flex-wrap overflow-y-visible">
+        {
+            extraGames.map((data) => (
+                <div id={data.id} title={data.title} class="game" style={{backgroundImage: `url(../games/extraGame-icons/${data.id}.png)`}}>
+                    <div class="textContainerContainer">
+                        <div class="textContainer">
+                            <p class="gameDesc">{data.description}</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-          </div>)
-      }
+            ))
+        }
+        {
+            games.map((data) => (
+                <div id={data.id} title={data.title} class="game" style={{backgroundImage: `url(https://metallic.eu.org/cdn/images/${data.id}.png)`}}>
+                    <div class="textContainerContainer">
+                        <div class="textContainer">
+                            <p class="gameDesc">{data.description.slice(0, 19)}</p>
+                            <p class="gameDesc">{data.description.slice(19, 38)}</p>
+                            <p class="gameDesc">{data.description.slice(38, 57)}</p>
+                            <p class="gameDesc">{data.description.slice(57, 76)=="" ? "" : data.description.slice(57, 73)+"..."}</p>
+                        </div>
+                    </div>
+                </div>
+            ))
+        }
     </div>
 </body>
+</html>
