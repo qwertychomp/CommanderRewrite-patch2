@@ -1,3 +1,25 @@
+---
+import storage from "../../lib/localStorage.ts";
+import gameFetch from "../../lib/gameFetch.ts";
+import extraGames from "./extra-games.json";
+import games from "./games.json"
+
+const charsPerLine = 19
+
+const proxy = storage.get('proxy');
+var x = ""
+var y = 0
+var createElement = false
+function compare(z: number,c: number){
+    return z>c
+}
+function equals(z: number,c: number){
+    return z==c
+}
+function updateX(desc: string){
+    x = x + desc
+}
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,96 +30,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/rgb-hex@4.1.0/index.js"></script>
     <script>
-        const toHex = (red, green, blue, alpha) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
-
-        function rgbHex(red, green, blue, alpha) {
-	        let isPercent = (red + (alpha || '')).toString().includes('%');
-
-	        if (typeof red === 'string' && !green) { // Single string parameter.
-		        const parsed = parseCssRgbString(red);
-		        if (!parsed) {
-			        throw new TypeError('Invalid or unsupported color format.');
-		        }
-
-		        isPercent = false;
-		        [red, green, blue, alpha] = parsed;
-	        } else if (alpha !== undefined) {
-		        alpha = Number.parseFloat(alpha);
-	        }
-
-	        if (typeof red !== 'number' ||
-		        typeof green !== 'number' ||
-		        typeof blue !== 'number' ||
-		        red > 255 ||
-		        green > 255 ||
-		        blue > 255
-	        ) {
-		        throw new TypeError('Expected three numbers below 256');
-	        }
-
-	        if (typeof alpha === 'number') {
-		        if (!isPercent && alpha >= 0 && alpha <= 1) {
-			        alpha = Math.round(255 * alpha);
-		        } else if (isPercent && alpha >= 0 && alpha <= 100) {
-			        alpha = Math.round(255 * alpha / 100);
-		        } else {
-			        throw new TypeError(Expected alpha value (${alpha}) as a fraction or percentage);
-		        }
-
-		        alpha = (alpha | 1 << 8).toString(16).slice(1); // eslint-disable-line no-mixed-operators
-	        } else {
-		        alpha = '';
-	        }
-
-	        return toHex(red, green, blue, alpha);
             var games = document.querySelectorAll(".textContainerContainer");
+            var moreStuff
             for(let x = 0;x<games.length;x++){
                 games[x].addEventListener("mouseover", (event) => {
-                    console.log("mouse hovering over " + event.currentTarget);
-                    console.log("its grandchild is " + event.currentTarget.children[0].children[0])
-                    //event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 50" + "%)");
-                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(195, 189, 192, 100" + "%)");
+                    event.currentTarget.children[0].style.display = "block"
                 });
                 games[x].addEventListener("mouseout", (event) => {
                     console.log("mouse left" + event.currentTarget)
-                    event.currentTarget.children[0].children[0].style["backgroundColor"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
-                    event.currentTarget.children[0].children[0].style["color"] = rgba2hex("rgba(0, 0, 0, 0"+ "%)");
+                    event.currentTarget.children[0].style.display = "none"
                 });
             }
-}
 
-    const parseCssRgbString = input => {
-	    const parts = input.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
-	    if (parts.length < 3) {
-		    return;
-	    }
-
-	    const parseValue = (value, max) => {
-		value = value.trim();
-
-		    if (value.endsWith('%')) {
-			    return Math.min(Number.parseFloat(value) * max / 100, max);
-		    }
-
-		    return Math.min(Number.parseFloat(value), max);
-	    };
-
-	    const red = parseValue(parts[0], 255);
-	    const green = parseValue(parts[1], 255);
-	    const blue = parseValue(parts[2], 255);
-	    let alpha;
-
-	        if (parts.length === 4) {
-		            alpha = parseValue(parts[3], 1);
-	            }
-
-	            return [red, green, blue, alpha];
-            };
-
-            function rgba2hex(input) {
-                console.log(rgbHex(input))
-                return "#" + rgbHex(input);
-            }
     </script>
     <style>
         body {
@@ -138,7 +82,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             background-color: rgba(0, 0, 0, 0);
-            color: rgba(195, 189, 192, 0);
+            color: rgba(195, 189, 192, 1);
             transition: color 1s;
             z-index: 99;
             white-space: nowrap;
@@ -157,6 +101,7 @@
             margin: auto;
             width: 150px;
             height: 100px;
+            display: none;
         }
         #searchIcon {
             font-size: 10vh;
@@ -171,6 +116,15 @@
         }
         #games {
             position: absolute;
+        }
+        #gameDesc1 {
+            top: 15px;
+        }
+        #gameDesc2 {
+            top: 30px;
+        }
+        #gameDesc3 {
+            top: 45px;
         }
     </style>
 </head>
@@ -194,13 +148,13 @@
         }
         {
             games.map((data) => (
-                <div id={data.id} title={data.title} class="game" style={{backgroundImage: `url(https://metallic.eu.org/cdn/images/${data.id}.png)`}}>
+                <div id={data.id} title={data.title} class="game" style={{backgroundImage: `url(https://metallic.eu.org${data.icon})`}}>
                     <div class="textContainerContainer">
                         <div class="textContainer">
-                            <p class="gameDesc">{data.description.slice(0, 19)}</p>
-                            <p class="gameDesc">{data.description.slice(19, 38)}</p>
-                            <p class="gameDesc">{data.description.slice(38, 57)}</p>
-                            <p class="gameDesc">{data.description.slice(57, 76)=="" ? "" : data.description.slice(57, 73)+"..."}</p>
+                            <p class="gameDesc">{data.description.slice(0, charsPerLine)}</p>
+                            <p class="gameDesc" id="gameDesc1">{data.description.slice(charsPerLine, charsPerLine*2)}</p>
+                            <p class="gameDesc" id="gameDesc2">{data.description.slice(charsPerLine*2, charsPerLine*3)}</p>
+                            <p class="gameDesc" id="gameDesc3">{data.description.slice(charsPerLine*3, charsPerLine*4)=="" ? "" : data.description.slice(charsPerLine*3, (charsPerLine*4)-3)+"..."}</p>
                         </div>
                     </div>
                 </div>

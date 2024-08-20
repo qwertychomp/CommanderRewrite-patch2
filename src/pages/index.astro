@@ -33,158 +33,24 @@ const theme = storage.get("theme") || "default";
     }
 </style>
 
-<script>
-    import setupBareMux from "../lib/bareMuxSetup";
-    import storage from "../lib/localStorage";
-    import rammerheadSearch from "../lib/rammerheadEncode";
-    import Proxies from "../lib/swProxyEncode";
-    import RegisterSW from "../lib/swRegister";
-
-    window.onload = async () => {
-        RegisterSW();
-        setupBareMux();
-
-        const parent = document.getElementById("selectables-parent");
-        const selectableDivs = parent.querySelectorAll("#selectable");
-        const input = document.getElementById("url-input");
-        const button = document.getElementById("url-go");
-        let selectedDiv = null;
-
-        input.oninput = () => {
-            const sw = new Proxies();
-
-            input.onkeydown = async (e) => {
-                if (e.key === "Enter") {
-                    const proxy = storage.get("proxy");
-                    // @ts-ignore
-                    if (input.value.startsWith("http://") || input.value.startsWith("https://")) {
-                        if (proxy === "rammerhead") {
-                            // @ts-ignore
-                            location.href = origin + await rammerheadSearch(input.value);
-                        } else if (proxy === "ultraviolet") {
-                            // @ts-ignore
-                            location.href = origin + await sw.encodeUltraviolet(input.value);
-                        } else {
-                            // @ts-ignore
-                            location.href = origin + await sw.encodeScramjet(input.value);
-                        }
-                    } else {
-                        if (proxy === "rammerhead") {
-                            location.href = origin + 
-                                rammerheadSearch(
-                                    "https://www.google.com/search?q=%s"
-                                    // @ts-ignore
-                                    .replace("%s", input.value)
-                                );
-                        } else if (proxy === "ultraviolet") {
-                            location.href = origin +
-                                sw.encodeUltraviolet(
-                                    "https://www.google.com/search?q=%s"
-                                    // @ts-ignore
-                                    .replace("%s", input.value)
-                                );
-                        } else {
-                            location.href = origin +
-                                sw.encodeScramjet(
-                                    "https://www.google.com/search?q=%s"
-                                    // @ts-ignore
-                                    .replace("%s", input.value)
-                                );
-                        }
-                    }
-                }
-            };
-
-            button.onclick = async () => {
-                const proxy = storage.get("proxy");
-                
-                // @ts-ignore
-                if (input.value.startsWith("http://") || input.value.startsWith("https://")) {
-                        if (proxy === "rammerhead") {
-                            // @ts-ignore
-                            location.href = origin + await rammerheadSearch(input.value);
-                        } else if (proxy === "ultraviolet") {
-                            // @ts-ignore
-                            location.href = origin + await sw.encodeUltraviolet(input.value);
-                        } else {
-                            // @ts-ignore
-                            location.href = origin + await sw.encodeScramjet(input.value);
-                        }
-                } else {
-                    if (proxy === "rammerhead") {
-                        location.href = origin + 
-                            rammerheadSearch(
-                                "https://www.google.com/search?q=%s"
-                                // @ts-ignore
-                                .replace("%s", input.value)
-                            );
-                    } else if (proxy === "ultraviolet") {
-                        location.href = origin +
-                            sw.encodeUltraviolet(
-                                "https://www.google.com/search?q=%s"
-                                // @ts-ignore
-                                .replace("%s", input.value)
-                            );
-                    } else {
-                        location.href = origin +
-                            sw.encodeScramjet(
-                                "https://www.google.com/search?q=%s"
-                                // @ts-ignore
-                                .replace("%s", input.value)
-                            );
-                    }
-                }
-            };
-        };
-
-        selectableDivs.forEach((div) => {
-            div.addEventListener("click", () => {
-                selectableDivs.forEach((otherDiv) => {
-                    otherDiv.classList.remove("selected");
-                });
-                div.classList.add("selected");
-                selectedDiv = div;
-                if (selectedDiv.querySelector("div").classList.toString().includes("ultraviolet")) {
-                    storage.set("proxy", "ultraviolet");
-                } else if (selectedDiv.querySelector("div").classList.toString().includes("rammerhead")) {
-                    storage.set("proxy", "rammerhead");
-                }
-            });
-        });
-
-        document.addEventListener("click", (e) => {
-            // @ts-ignore
-            if (e.target !== parent && !parent.contains(e.target)) {
-                if (selectedDiv) {
-                    selectedDiv.classList.remove("selected");
-                    selectedDiv = null;
-                }
-            }
-        });
-
-        if (storage.get("proxy") === "rammerhead") {
-            // @ts-ignore
-            document.querySelector("div[class^=\"bg-[url('/img/rammerhead.png')]\"]").click();
-        } else if (storage.get("proxy") === "ultraviolet") {
-            // @ts-ignore
-            document.querySelector("div[class^=\"bg-[url('/img/ultraviolet.png')]\"]").click();
-        } else {
-            // @ts-ignore
-            document.querySelector("div[class^=\"bg-[url('/img/ultraviolet.png')]\"]").click();
-        }
-    };
-</script>
-
-<script is:inline src="/baremux/bare.cjs" defer></script>
 <script is:inline src="/baremux/index.js" defer></script>
-<script is:inline src="/epoxy/index.js" defer></script>
-<script is:inline src="/libcurl/index.js" defer></script>
-<script is:inline src="/ultraviolet/uv.bundle.js" defer></script>
-<script is:inline src="/ultraviolet/uv.config.js" defer></script>
-<script is:inline src="/scramjet/scramjet.codecs.js" defer></script>
-<script is:inline src="/scramjet/scramjet.config.js" defer></script>
+<script is:inline src="/ultraviolet/uv.bundle.js"></script>
+<script is:inline src="/ultraviolet/uv.config.js"></script>
+<script is:inline src="/scramjet/scramjet.codecs.js"></script>
+<script is:inline src="/scramjet/scramjet.config.js"></script>
+<script is:inline src="/meteor/meteor.codecs.js"></script>
+<script is:inline src="/meteor/meteor.config.js"></script>
+<script is:inline src="/meteor/meteor.bundle.js"></script>
 
 <script is:inline src="/sw.js" defer></script>
+
+<script>
+    import toggleHomeUtils from "../lib/homeUtils.ts";
+
+    toggleHomeUtils();
+
+    onbeforeunload = () => 1;
+</script>
 
 <body
     class={
