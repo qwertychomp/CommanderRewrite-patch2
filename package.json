@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "deno run --allow-net --allow-read --allow-env ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^8.3.3",
     "@astrojs/tailwind": "^5.1.0",
     "@fontsource/montserrat": "^5.0.18",
     "@fontsource/nunito": "^5.0.18",
@@ -30,6 +31,7 @@
     "compression": "^1.7.4",
     "express": "^4.19.2",
     "rammerhead": "https://github.com/NebulaServices/rammerhead/releases/download/rammerhead-1.2.41-nebula.8/rammerhead-1.2.41-nebula.7.tgz",
+    "re2": "^1.21.3",
     "rgb-hex": "^4.1.0",
     "serve-static": "^1.15.0",
     "sharp": "^0.33.4",
