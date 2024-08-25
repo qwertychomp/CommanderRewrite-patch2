@@ -1,0 +1,35 @@
+---
+export const prerender = true;
+
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+---
+<head>
+    <style>
+        #background{
+            background-color: "#080d0f";
+            z-index: -1;
+        }
+        .text{
+            font-family: 'Roboto';
+        }
+        #notfound{
+            font-weight: 700;
+            color: "#84C126";
+        }
+        #upper{
+            font-weight: 500;
+        }
+        #lower{
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div id="background">
+        <h1 class="text" id="notfound">404</h1>
+        <p id="upper">Hey Commander, I'm lost!</p>
+        <p id="lower">unfortunately, the page you are looking for doesnt exist :(</p>
+    </div>
+</body>

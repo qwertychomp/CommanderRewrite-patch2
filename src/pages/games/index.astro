@@ -30,10 +30,12 @@ function updateX(desc: string){
     <title>Game Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/rgb-hex@4.1.0/index.js"></script>
     <script>
+            const url = [...window.location.href.matchAll(RegExp("(http:\/\/|https:\/\/)[a-z]*(\.[a-z]+)*"))]
+            const api = url + ""
             var games = document.querySelectorAll(".textContainerContainer");
-            var moreStuff
+            var searchResults = document.querySelector("#searchDiv")
+            var search = document.querySelector("#search")
             for(let x = 0;x<games.length;x++){
                 games[x].addEventListener("mouseover", (event) => {
                     event.currentTarget.children[0].style.display = "block"
@@ -43,6 +45,15 @@ function updateX(desc: string){
                     event.currentTarget.children[0].style.display = "none"
                 });
             }
+            search.addEventListener("input", (event) => {
+                var text = search.value
+                if(text==""){
+                    
+                }else{
+
+                }
+            });
+
 
     </script>
     <style>
@@ -128,6 +139,11 @@ function updateX(desc: string){
         #gameDesc3 {
             top: 45px;
         }
+        #searchDiv {
+            position: absolute;
+            display: none;
+            z-index: 3;
+        }
     </style>
 </head>
 <body class="bg-[#080d0f] w-full min-h-screen flex flex-col justify-center items-center gap-[28px]">
@@ -150,7 +166,7 @@ function updateX(desc: string){
         }
         {
             games.map((data) => (
-                <div id={data.id} title={data.title} class="game" style={{backgroundImage: `url(https://metallic.eu.org${data.icon})`}}>
+                <div id={data.id} name={data.id} title={data.title} class="game" style={{backgroundImage: `url(https://metallic.eu.org${data.icon})`}}>
                     <div class="textContainerContainer">
                         <div class="textContainer">
                             <p class="gameDesc">{data.description.slice(0, charsPerLine)}</p>
@@ -162,6 +178,9 @@ function updateX(desc: string){
                 </div>
             ))
         }
+        <div id="searchdiv" class="w-full h-[65%] flex flex-row justify-center items-center gap-[20px] flex-wrap overflow-y-visible">
+
+        </div>
     </div>
 </body>
 </html>
