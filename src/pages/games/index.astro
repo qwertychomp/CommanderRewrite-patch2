@@ -31,8 +31,16 @@ function updateX(desc: string){
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
+        function combineIterator(thing){
+                var returnString = ""
+                for(let x = 0;thing.length>x;x++){
+                    returnString = returnString + thing[x]
+                }
+                console.log(returnString)
+                return returnString
+            }
             const url = [...window.location.href.matchAll(RegExp("(http:\/\/|https:\/\/)[a-z]*(\.[a-z]+)*"))]
-            const api = url + ""
+            const api = combineIterator(url) + "/gamesearch" 
             var games = document.querySelectorAll(".textContainerContainer");
             var searchResults = document.querySelector("#searchDiv")
             var search = document.querySelector("#search")
@@ -45,12 +53,49 @@ function updateX(desc: string){
                     event.currentTarget.children[0].style.display = "none"
                 });
             }
-            search.addEventListener("input", (event) => {
+            search.addEventListener("input", async (event) => {
                 var text = search.value
+                var result
                 if(text==""){
-                    
+                    searchResults.style.display = "none"
                 }else{
+                    const image = document.getElementById("target");
+                    //a bunch of stupid code to fetch from api i made from the mdn fetch example, because im too stuid to figure out all the fancy async stuff like readablestreams
+                    //this should be replaced with a library like axios or something 
+                fetch(api + text)
+                // Retrieve its body as ReadableStream
+                .then((response) => response.body)
+                .then((body) => {
+                    const reader = body.getReader();
 
+                    return new ReadableStream({
+                    start(controller) {
+                        return pump();
+
+                        function pump() {
+                        return reader.read().then(({ done, value }) => {
+                            // When no more data needs to be consumed, close the stream
+                            if (done) {
+                            controller.close();
+                            return;
+                            }
+
+                            // Enqueue the next data chunk into our target stream
+                            controller.enqueue(value);
+                            return pump();
+                         });
+                        }
+                    },
+                    });
+                    })
+                    .then((stream) => new Response(stream))
+                    .then((response) => response.text())
+                    .then((stuffThing) => result = stuffThing)
+                    .catch((err) => console.error(err));
+
+                    console.log(result)
+                    searchResults.innerHTML = result
+                    searchResults.style.display = "auto"
                 }
             });
 
