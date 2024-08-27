@@ -1,6 +1,8 @@
 
 import { handler as ssrHandler } from './dist/server/entry.mjs';
-import  notFound  from '.dist/404.html';
+import  notFound  from '.dist/client/404.html';
+import gamesText from '.dist/client/games.txt';
+import extraGames from '.dist/client/extra-games.txt'
 
 const charsPerLine = 19
 
@@ -55,7 +57,6 @@ function get_wrap(url,headers) {
     return dumb_shit
   }
 
-const gamesText = await get("https://cdn.jsdelivr.net/gh/Quartinal/CommanderRewrite@main/src/pages/games/games.json")
 function search(queryThing){
   var query
   //we worship the perl gods, creators of the holy lookahead and lookbehind assertion
